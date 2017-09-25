@@ -1,0 +1,25 @@
+\chapter{Installation}
+DynamoDB is intended to be run via the Amazon AWS console. Though it is also possible to it on a self hosted environment. In this chapter we will take a look on both possibilities.
+
+\section{Hosted by AWS}
+Hosting DynamoDB via Amazon AWS is for sure the most convenient way to go. There is nearly zero configuration required to set up a DynamoDB table. This also concludes that there is not a whole team of developers and devops required to setup and maintain the database which can save a company a lot of money.
+
+\subsection{Creating AWS Account}
+In order to host DynamoDB in AWS it is necessary to create an AWS account. To do so go to \hyperref[awswebsite]{https://aws.amazon.com/}. Click on register and follow the registration process.
+
+After the registration you are done. No more steps are required to create the first DynamoDB table. You can go to the AWS console, select DynamoDB and click on create table.
+
+\section{Self-hosted}
+There is a downloadable version of DynamoDB which provides an executable .jar file. Which means that it will run on all platforms that are supported by Java.\cite{wwwdynamodblocal}
+\paragraph{Note:}Amazon does not mention if this version should be used in production. In their documentation they are only explaining that this version could be used local for offline development.
+
+\subsection{Downloading and Running DynamoDB}
+\begin{enumerate}
+	\item Download DynamoDB from \hyperref[awsdocswebsite]{docs.aws.amazon.com}.
+	\item After the download is complete, extract the contents.
+	\item To start DynamoDB you need to open a command prompt window, navigate to its folder and execute the following command
+		\begin{lstlisting}[]
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+		\end{lstlisting}
+	\item Congratulations! DynamoDB is successfully running on your machine.
+\end{enumerate}

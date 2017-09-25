@@ -1,0 +1,50 @@
+\chapter{Main Features}
+\label{cha:main-features}
+
+Amazon DynamoDB aims to be cost-effective and to simplify the usage of scaling databases by taking care of the database-software-management and by providing hardware needed to run it. Because of this improvements, users should be able to create and deploy their non-relational databases in just a few minutes. 
+
+\vspace{20pt}
+
+\begin{figure}[H]
+\centering
+	\includegraphics[width=0.99\textwidth]{images/dynamodb-logo}
+	\caption{Amazon DyanamoDB logo}
+	\label{fig:logo}
+\end{figure}
+
+\vspace{20pt}
+
+\section{Performance} 
+		Average service-side latencies are typically single-digit milliseconds. When volumes increase further, DynamoDB will use automatic partitioning and SSD technologies to meet the upcoming requirements and will deliver low latencies at any scale.
+		
+\section{Scalablility} 
+		By default, Auto Scaling is active for creating tables or global secondary indexes. Therefore, one will only need to specify the target utilization. 
+		Furthermore, the capacity is being scaled up or down automatically, depending on the application request volumes status. 
+		CloudWatch alarms are always monitoring the throughput consumption, while the Users can see the scaling activities in real-time from the management console. 
+		
+\section{Flexibility} 
+		DynamoDB is known for supporting both document and key-value stored data structures. Therefore, users can choose how to design their architecture and work with what they prefer.
+
+\section{Management} 
+		DynamoDB is a fully managed cloud service. Users only have to create a database table, set the traget utilization for Auto Scaling and let the service do what it is best at: handling everything else.
+		
+\section{Event driven programming}  
+		One can use AWS Lambda\footnote{AWS Lambda is a serverless compute service, which runs one's code for virtually any type of application or backend service, while the user doesn't have to care for administration. It is provided by Amazon.com, for further informations have a look at \href{https://aws.amazon.com/lambda/}{www.aws.amazon.com/lambda}} to have the possibility to use Triggers, enabling architect applications that react automatically to changes in data.
+		
+\section{Access control} 
+		Using AWS Identity and Access Management\footnote{IAM allows one to safely control their user-access to aws services and -resources. One can assign security credentials to each user and therefore control which access allowances are granted. It is provided by Amazon.com, for further informations have a look at \href{https://aws.amazon.com/iam/}{www.aws.amazon.com/iam}} with Amazon DynamoDB can allow fine-grained access control for users within one's organization.
+		
+	
+
+
+
+
+
+
+
+
+
+
+
+
+

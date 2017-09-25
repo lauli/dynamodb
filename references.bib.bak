@@ -1,0 +1,43 @@
+% Encoding: UTF-8
+%% This BibTeX bibliography file was created using BibDesk.
+%% http://bibdesk.sourceforge.net/
+
+%% Created for Laureen Schausberger at 2017-06-27 14:34:40 +0200 
+
+
+%% Saved with string encoding Unicode (UTF-8) 
+
+
+
+@webpage{techtarget,
+	Date-Added = {2017-06-27 12:34:08 +0000},
+	Date-Modified = {2017-06-27 12:34:39 +0000},
+	Lastchecked = {27. June 2017},
+	Url = {http://searchaws.techtarget.com/definition/Amazon-Dynamo-Database-DDB}}
+
+@Book{AmazonWebServices2013,
+  title     = {Amazon DynamoDB Developer Guide},
+  publisher = {Amazon},
+  year      = {2013},
+  author    = {AmazonWebServices},
+}
+
+@Webpage{wwwdynamodblocal,
+  author       = {Amazon},
+  title        = {Setting Up DynamoDB Local (Downloadable Version)},
+  howpublished = {http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html},
+  timestamp    = {2017-06-28},
+  url          = {http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html},
+  urldate      = {2017-06-28},
+}
+
+@Webpage{wwwscalingdynamodb,
+  author       = {Jono MacDougall},
+  title        = {Scaling a Startup Using DynamoDB},
+  howpublished = {https://syslog.ravelin.com/scaling-a-startup-using-dynamodb-4d97b0843350},
+  timestamp    = {2017-06-28},
+  url          = {https://syslog.ravelin.com/scaling-a-startup-using-dynamodb-4d97b0843350},
+  urldate      = {2017-06-28},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

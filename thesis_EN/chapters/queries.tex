@@ -1,0 +1,428 @@
+\chapter{Queries}
+\label{cha:queries}
+
+\subsection{ALTER}
+\subsubsection{Description}
+Changes read/write throughput on table.\\
+If not both but only one of the throughput values should be changed, "0" or "*" must be used.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+ALTER TABLE tablename
+    SET [INDEX index] THROUGHPUT throughput
+ALTER TABLE tablename
+    DROP INDEX index [IF EXISTS]
+ALTER TABLE tablename
+    CREATE GLOBAL [ALL|KEYS|INCLUDE] INDEX global_index [IF NOT EXISTS]
+\end{lstlisting}
+\begin{itemize}
+	\item \textbf{tablename}\\
+	name of table
+	\item \textbf{throughput}\\
+	read/write throughput (read\_throughput, write\_throughput)
+	\item \textbf{index}\\
+	name of global index
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+ALTER TABLE foobars SET THROUGHPUT (4, 8);
+ALTER TABLE foobars SET THROUGHPUT (7, *);
+ALTER TABLE foobars SET INDEX ts-index THROUGHPUT (5, *);
+ALTER TABLE foobars SET INDEX ts-index THROUGHPUT (5, *);
+ALTER TABLE foobars DROP INDEX ts-index;
+ALTER TABLE foobars DROP INDEX ts-index IF EXISTS;
+ALTER TABLE foobars CREATE GLOBAL INDEX ('ts-index', ts NUMBER, THROUGHPUT (5, 5));
+ALTER TABLE foobars CREATE GLOBAL INDEX ('ts-index', ts NUMBER) IF NOT EXISTS;
+\end{lstlisting}
+
+% --------------------------- ANALYZE
+\subsection{ANALYZE}
+\subsubsection{Description}
+Can prefix any query reading or writing data.\\
+Will also print out how much capacity was consumed at every part of query.
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+ANALYZE query
+\end{lstlisting}
+\vspace{20pt}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+ANALYZE SELECT * FROM foobars WHERE id = 'a';
+ANALYZE INSERT INTO foobars (id, name) VALUES (1, 'dsa');
+ANALYZE DELETE FROM foobars KEYS IN ('foo', 'bar'), ('baz', 'qux');
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- CREATE
+\subsection{CREATE}
+\subsubsection{Description}
+Creates new table. Must have: 
+\begin{itemize}
+	\item exactly one hash key
+	\item zero or one range keys (mandatory if having local indexes)
+	\item up to five local indexes 
+	\item up to five global indexes
+\end{itemize}
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+CREATE TABLE
+    [IF NOT EXISTS]
+    tablename
+    attributes
+    [GLOBAL [ALL|KEYS|INCLUDE] INDEX global_index]	
+\end{lstlisting}
+\begin{itemize}
+	\item \textbf{IF NOT EXISTS}\\
+	don't through an exception if table already exists
+	\item \textbf{tablename} \\
+	name of table you want to alter
+	\item \textbf{attributes} \\
+	attribute declaration like $name$ $data type$  $[key type] $. \\
+	Available data types: STRING, NUMBER, BINARY \\
+	Available key types : $HASH\_KEY$, $RANGE\_KEY$, $[ALL|KEYS|INCLUDE]$ $INDEX(name) $
+	\item \textbf{global\_index}\\
+	global index for table
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+CREATE TABLE foobars (id STRING HASH KEY);
+CREATE TABLE IF NOT EXISTS foobars (id STRING HASH KEY);
+CREATE TABLE foobars (id STRING HASH KEY, foo BINARY RANGE KEY,
+                      THROUGHPUT (1, 1));
+CREATE TABLE foobars (id STRING HASH KEY,
+                      foo BINARY RANGE KEY,
+                      ts NUMBER INDEX('ts-index'),
+                      views NUMBER INDEX('views-index'));
+CREATE TABLE foobars (id STRING HASH KEY, bar STRING) GLOBAL INDEX
+                     ('bar-index', bar, THROUGHPUT (1, 1));
+CREATE TABLE foobars (id STRING HASH KEY, baz NUMBER,
+                      THROUGHPUT (2, 2))
+                      GLOBAL INDEX ('bar-index', bar STRING, baz)
+                      GLOBAL INCLUDE INDEX ('baz-index', baz, ['bar'], THROUGHPUT (4, 2));	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- DELETE
+\subsection{DELETE}
+\subsubsection{Description}
+Deletes items from table.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+DELETE FROM
+    tablename
+    [ KEYS IN primary_keys ]
+    [ WHERE expression ]
+    [ USING index ]
+    [ THROTTLE throughput ]	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{tablename} \\
+	name of table
+	\item \textbf{primary\_keys} \\
+	list of primary keys to the items to be deleted
+	\item \textbf{expression} \\
+	see SELECT for details about the WHERE clause, Chapter \ref{sssec:select}
+	\item \textbf{index} \\
+	when WHERE uses an indexed attribute, it allows you to specify an index name for the query
+	\item \textbf{THROTTLE} \\
+	limit the amount of throughput this query can consume\\
+	$(read\_throughput, write\_throughput)$\\
+	i.e. $(20\%, 50\%)$ or $(20, 50)$ 
+\end{itemize}
+\vspace{40pt}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+DELETE FROM foobars; -- This will delete all items in the table!
+DELETE FROM foobars WHERE foo != 'bar' AND baz >= 3;
+DELETE FROM foobars KEYS IN 'hkey1', 'hkey2' WHERE attribute_exists(foo);
+DELETE FROM foobars KEYS IN ('hkey1', 'rkey1'), ('hkey2', 'rkey2');
+DELETE FROM foobars WHERE (foo = 'bar' AND baz >= 3) USING baz-index;
+	
+\end{lstlisting}
+\vspace{40pt}
+
+
+% --------------------------- DROP
+\subsection{DROP}
+\subsubsection{Description}
+Deletes table and all of its items.\\
+Should be used carefully!!
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+DROP TABLE
+    [ IF EXISTS ]
+    tablename	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{IF EXISTS}\\
+	don't raise an exception if table doesn't exist
+	\item \textbf{tablename} \\
+	name of table
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+DROP TABLE foobars;
+DROP TABLE IF EXISTS foobars;	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- DUMP
+\subsection{DUMP}
+\subsubsection{Description}
+Prints out the matching CREATE statements for tables.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+DUMP SCHEMA [ tablename [, ...] ]
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{tablename}\\
+	name of table(s) whose schema should be dumped.\\
+	will dump every table schemas by default if no tablename is given.
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+DUMP SCHEMA;
+DUMP SCHEMA foobars, widgets;	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- EXPLAIN
+\subsection{EXPLAIN}
+\subsubsection{Description}
+Meta-query, which is going to print out debug informations.
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+EXPLAIN query	
+\end{lstlisting}
+\vspace{20pt}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+EXPLAIN SELECT * FROM foobars WHERE id = 'a';
+EXPLAIN INSERT INTO foobars (id, name) VALUES (1, 'dsa');
+EXPLAIN DELETE FROM foobars KEYS IN ('foo', 'bar'), ('baz', 'qux');	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- INSERT 
+\subsection{INSERT}
+\subsubsection{Description}
+Inserts data into table.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+INSERT INTO tablename
+    attributes VALUES values
+    [ THROTTLE throughput ]
+INSERT INTO tablename
+    items
+    [ THROTTLE throughput ]	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{tablename} \\
+	name of table
+	\item \textbf{attributes} \\
+	comma-seperated list of attributes
+	\item \textbf{values} \\
+	comma-seperated list of data, that should be inserted\\
+	must contain same number of items as the attributes param
+	$var [, var]...$ 
+	\item \textbf{items} \\
+	comma-seperated key-value pairs, that should be inserted
+	\item \textbf{THROTTLE} \\
+	limit the amount of throughput this query can consume\\
+	$(read\_throughput, write\_throughput)$\\
+	i.e. $(20\%, 50\%)$ or $(20, 50)$
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+INSERT INTO foobars (id) VALUES (1);
+INSERT INTO foobars (id, bar) VALUES (1, 'hi'), (2, 'yo');
+INSERT INTO foobars (id='foo', bar=10);
+INSERT INTO foobars (id='foo'), (id='bar', baz=(1, 2, 3));	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- LOAD
+\subsection{LOAD}
+\subsubsection{Description}
+Takes result of $SELECT ... SAVE$ $outfile$ and inserts all the records into table.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+LOAD filename INTO tablename
+    [ THROTTLE throughput ]	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{filename} \\
+	file containing records to upload
+	\item \textbf{tablename} \\
+	name of table
+	\item \textbf{THROTTLE} \\
+	limit the amount of throughput this query can consume\\
+	$(read\_throughput, write\_throughput)$\\
+	i.e. $(20\%, 50\%)$ or $(20, 50)$
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+LOAD archive.p INTO mytable;
+LOAD dump.json.gz INTO mytable;	
+\end{lstlisting}
+\vspace{40pt}
+
+% --------------------------- SCAN
+\subsection{SCAN}
+\subsubsection{Description}
+Is the exact same as a SELECT statement with the difference that it's allowed to perform table scans.\\
+See Section \ref{sssec:select}
+
+
+% --------------------------- SELECT
+\subsection{SELECT}
+\label{sssec:select}
+\subsubsection{Description}
+Query table for items.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+SELECT
+    [ CONSISTENT ]
+    attributes
+    FROM tablename
+    [ KEYS IN primary_keys | WHERE expression ]
+    [ USING index ]
+    [ LIMIT limit ]
+    [ SCAN LIMIT scan_limit ]
+    [ ORDER BY field ]
+    [ ASC | DESC ]
+    [ THROTTLE throughput ]
+    [ SAVE filename]	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{CONSISTENT} \\
+	if present, perform strongly consistent read
+	\item \textbf{attributes} \\
+	Comma-separated list of attributes to fetch or expressions\\
+	$TIMESTAMP$ and $DATE$ functions can be used, as well as arithmetic ($foo + (bar - 3) / 100$)\\
+	$SELECT *$ means ‘all attributes’\\
+	$SELECT count(*)$ will return the number of results
+	\item \textbf{tablename} \\
+	name of table
+	\item \textbf{index} \\
+	When WHERE expression uses an indexed attribute, this allows you to manually specify which index name to use for the query
+	\item \textbf{limit} \\
+	maximum number of items to return
+	\item \textbf{scan\_limit} \\
+	maximum number of items for DynamoDB to scan
+	\item \textbf{ORDER BY} \\
+	sorts results by field
+	\item \textbf{ASC | DESC} \\
+	sorts results in ASCending (default) or DESCending order
+	\item \textbf{THROTTLE} \\
+	limit the amount of throughput this query can consume\\
+	$(read\_throughput, write\_throughput)$\\
+	i.e. $(20\%, 50\%)$ or $(20, 50)$
+	\item \textbf{SAVE} \\
+	saves results to a file
+\end{itemize}
+
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+SELECT * FROM foobars SAVE out.p;
+SELECT * FROM foobars WHERE foo = 'bar';
+SELECT count(*) FROM foobars WHERE foo = 'bar';
+SELECT id, TIMESTAMP(updated) FROM foobars KEYS IN 'id1', 'id2';
+SELECT * FROM foobars KEYS IN ('hkey', 'rkey1'), ('hkey', 'rkey2');
+SELECT CONSISTENT * foobars WHERE foo = 'bar' AND baz >= 3;
+SELECT * foobars WHERE foo = 'bar' AND attribute_exists(baz);
+SELECT * foobars WHERE foo = 1 AND NOT (attribute_exists(bar) OR contains(baz, 'qux'));
+SELECT 10 * (foo - bar) FROM foobars WHERE id = 'a' AND ts < 100 USING ts-index;
+SELECT * FROM foobars WHERE foo = 'bar' LIMIT 50 DESC;
+SELECT * FROM foobars THROTTLE (50%, *);	
+\end{lstlisting}
+\vspace{20pt}
+
+\subsubsection{WHERE Clause}
+if provided, the SELECT operation will use these constraints as the KeyConditionExpression if possible, and if not (or if there are constraints left over), the FilterExpression. 
+\vspace{40pt}
+
+% --------------------------- UPDATE
+\subsection{UPDATE}
+\subsubsection{Description}
+Updates items in table.
+
+\subsubsection{Synopsis}
+\lstset{language=Java}
+\begin{lstlisting}
+UPDATE tablename
+    update_expression
+    [ KEYS IN primary_keys ]
+    [ WHERE expression ]
+    [ USING index ]
+    [ RETURNS (NONE | ( ALL | UPDATED) (NEW | OLD)) ]
+    [ THROTTLE throughput ]	
+\end{lstlisting}
+
+\begin{itemize}
+	\item \textbf{tablename} \\
+	name of table
+	\item \textbf{RETURNS} \\
+	return items that were operated on
+	\item \textbf{THROTTLE} \\
+	limit the amount of throughput this query can consume\\
+	$(read\_throughput, write\_throughput)$\\
+	i.e. $(20\%, 50\%)$ or $(20, 50)$
+	\item \textbf{SAVE} \\
+	saves results to a file
+\end{itemize}
+\subsubsection{Examples}
+\lstset{language=Java}
+\begin{lstlisting}
+UPDATE foobars SET foo = 'a';
+UPDATE foobars SET foo = 'a', bar = bar + 4 WHERE id = 1 AND foo = 'b';
+UPDATE foobars SET foo = if_not_exists(foo, 'a') RETURNS ALL NEW;
+UPDATE foobars SET foo = list_append(foo, 'a') WHERE size(foo) < 3;
+UPDATE foobars ADD foo 1, bar 4;
+UPDATE foobars ADD fooset (1, 2);
+UPDATE foobars REMOVE old_attribute;
+UPDATE foobars DELETE fooset (1, 2);	
+\end{lstlisting}
+\vspace{20pt}

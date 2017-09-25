@@ -1,0 +1,26 @@
+% Show datatype limitations
+\chapter{Limitations}
+\section{Data Types}
+When looking at the table below it is very clear to see that the maximum size for storing objects 400 KB is. Therefore it is not possible to save large objects (BLOB) to the database. If it is necessary to save large objects you have to use Amazon S3 storage which is comparatively slow. To increase the search speed it is possible to save the meta information of the object to DynamoDB.
+\begin{table}[htt]
+\centering
+\caption{Data type limitations}
+\begin{tabular}{|l|l|}
+\hline
+Data Type     & Maximum Size \\ \hline
+String        & 400 KB       \\ \hline
+Number        & 38 digits    \\ \hline
+Binary        & 400 KB       \\ \hline
+Partition Key & 2048 bytes   \\ \hline
+Sort Key      & 1024 bytes   \\ \hline
+\end{tabular}
+\end{table}
+
+
+\section{Scalability}
+Scaling DynamoDB is very is easy possible via the AWS Console. But it's hard to find the right scale. Throughput should meet the needs of the users and your pocketbook. The process of finding the correct configuration for the right scale can be plodding and exhaustive.
+
+
+\section{Complex queries}
+DynamoDB is very good at high throughput reads and writes with ~10ms response time on simple queries. But when it comes to more complex queries it reaches its limits very fast. To be able to execute more complicate queries it is necessary to add secondary indexes but these are limited to 10 GB on data under a single key. Reaching this boundary can bring the system to halt.
+\cite{wwwscalingdynamodb}
